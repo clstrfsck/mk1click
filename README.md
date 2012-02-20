@@ -12,6 +12,12 @@ Unpacks and shuffles the resulting files into a structure based on the official 
 
 Note that Windows VM is currently *not* included.  If there is an official place to get this, it can easily be added.
 
+## To use
+
+    ./mk1click
+
+You should end up with a file `Pharo-1.4-nightly-OneClick.zip` in the current directory.
+
 ## License
 
 Released under the MIT license to match Pharo.
