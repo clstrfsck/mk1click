@@ -27,7 +27,7 @@ function get_buildfile {
 echo "Fetch Pharo and VM build numbers"
 PBLDNUM=`get_buildnum "Pharo%201.4"`
 LBLDNUM=`get_buildnum "Cog-Unix"`
-MBLDNUM=`get_buildnum "Cog-Mac-Cocoa-blessed"`
+MBLDNUM=`get_buildnum "Cog-Mac-Cocoa"`
 #WBLDNUM=`get_buildnum "Cog-Win32"`
 WBLDNUM=0
 
@@ -43,11 +43,11 @@ ZIP=${BASENAME}.zip
 echo "Building $ZIP using Pharo 1.4 build $PBLDNUM"
 echo "Using Linux/MacOS/Win32 Cog VM builds $LBLDNUM/$MBLDNUM/$WBLDNUM"
 
-get_buildfile "$LFILE" "Cog-Unix"		${LBLDNUM} Cog.zip
-get_buildfile "$MFILE" "Cog-Mac-Cocoa-blessed"	${MBLDNUM} CogVM.zip
-get_buildfile "$WFILE" "Cog-Win32"		${WBLDNUM} CogVM.zip
+get_buildfile "$LFILE" "Cog-Unix"	${LBLDNUM} Cog.zip
+get_buildfile "$MFILE" "Cog-Mac-Cocoa"	${MBLDNUM} CogVM.zip
+get_buildfile "$WFILE" "Cog-Win32"	${WBLDNUM} CogVM.zip
 
-get_buildfile "$PFILE" "Pharo%201.4"		${PBLDNUM} Pharo-1.4.zip
+get_buildfile "$PFILE" "Pharo%201.4"	${PBLDNUM} Pharo-1.4.zip
 
 echo "Unpack and rearrange files"
 unzip -q -d "$BUILD"				"$MFILE"
