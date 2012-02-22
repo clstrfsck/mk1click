@@ -1,48 +1,75 @@
 #!/bin/bash
 
+set -e
+
 BUILD=build
-APP=Pharo-1.4-nightly-OneClick.app
-ZIP=`basename $APP .app`.zip
-JENKINS=https://ci.lille.inria.fr/pharo/view
+JENKINS=https://ci.lille.inria.fr/pharo/job
 
 if [ -e $BUILD ]; then
   echo "Build directory '$BUILD' exists.  Please remove before trying again."
   exit 1
 fi
 
-rm -f cog-unix.zip cog-mac.zip Pharo-1.4.zip
+function get_buildnum {
+    # First argument is job name
+    curl -f "$JENKINS/$1/lastSuccessfulBuild/buildNumber"
+}
 
-echo "Fetch Linux Cog VM"
-curl -o cog-unix.zip  $JENKINS/VM/job/Cog-Unix/lastSuccessfulBuild/artifact/Cog.zip
-echo "Fetch MacOS Cog VM"
-curl -o cog-mac.zip   $JENKINS/VM/job/Cog-Mac-Cocoa-blessed/lastSuccessfulBuild/artifact/CogVM.zip
-echo "Fetch Pharo 1.4 image"
-curl -o Pharo-1.4.zip $JENKINS/Pharo%201.4/job/Pharo%201.4/lastSuccessfulBuild/artifact/Pharo-1.4.zip
+function get_buildfile {
+    # First argument is output file, second is job name
+    # third is build number and fourth is artifact name
+    if [ ! -e "$1" ]; then
+	echo "Fetch $1"
+	curl -f -o "$1" "$JENKINS/$2/$3/artifact/$4"
+    fi
+}
+
+echo "Fetch Pharo and VM build numbers"
+PBLDNUM=`get_buildnum "Pharo%201.4"`
+LBLDNUM=`get_buildnum "Cog-Unix"`
+MBLDNUM=`get_buildnum "Cog-Mac-Cocoa-blessed"`
+#WBLDNUM=`get_buildnum "Cog-Win32"`
+WBLDNUM=0
+
+PFILE=Pharo-1.4-${PBLDNUM}.zip
+LFILE=cog-linux-${LBLDNUM}.zip
+MFILE=cog-macos-${MBLDNUM}.zip
+WFILE=cog-win32-${WBLDNUM}.zip
+
+BASENAME=Pharo-1.4-${PBLDNUM}-L${LBLDNUM}-M${MBLDNUM}-W${WBLDNUM}-OneClick
+APP=${BASENAME}.app
+ZIP=${BASENAME}.zip
+
+echo "Building $ZIP using Pharo 1.4 build $PBLDNUM"
+echo "Using Linux/MacOS/Win32 Cog VM builds $LBLDNUM/$MBLDNUM/$WBLDNUM"
+
+get_buildfile "$LFILE" "Cog-Unix"		${LBLDNUM} Cog.zip
+get_buildfile "$MFILE" "Cog-Mac-Cocoa-blessed"	${MBLDNUM} CogVM.zip
+get_buildfile "$WFILE" "Cog-Win32"		${WBLDNUM} CogVM.zip
+
+get_buildfile "$PFILE" "Pharo%201.4"		${PBLDNUM} Pharo-1.4.zip
 
 echo "Unpack and rearrange files"
-unzip -q -d $BUILD cog-mac.zip
-mv $BUILD/CogVM.app $BUILD/$APP
-mv $BUILD/$APP/Contents/MacOS/CogVM $BUILD/$APP/Contents/MacOS/pharo
-unzip -q -d $BUILD/$APP/Contents/Linux cog-unix.zip
-mv $BUILD/$APP/Contents/Linux/CogVM $BUILD/$APP/Contents/Linux/pharo
-unzip -q -j -d $BUILD/$APP/Contents/Resources Pharo-1.4.zip
-mv $BUILD/$APP/Contents/Resources/Pharo-1.4.image $BUILD/$APP/Contents/Resources/pharo.image
-mv $BUILD/$APP/Contents/Resources/Pharo-1.4.changes $BUILD/$APP/Contents/Resources/pharo.changes
+unzip -q -d "$BUILD"				"$MFILE"
+mv "$BUILD/CogVM.app" "$BUILD/$APP"
+unzip -q -d "$BUILD/$APP/Contents/Linux"	"$LFILE"
+unzip -q -d "$BUILD/$APP"			"$WFILE"
+unzip -q -j -d "$BUILD/$APP/Contents/Resources"	"$PFILE"
 
 echo "Additional files"
-cp misc/Info.plist $BUILD/$APP/Contents
-cp misc/PkgInfo $BUILD/$APP/Contents
-cp misc/Pharo.icns $BUILD/$APP/Contents/Resources
-cp misc/SqueakImage.icns $BUILD/$APP/Contents/Resources
-cp misc/pharo.sh $BUILD/$APP
-cp misc/readme.txt $BUILD/$APP
+cp misc/Info.plist		"$BUILD/$APP/Contents"
+cp misc/PkgInfo			"$BUILD/$APP/Contents"
+cp misc/Pharo.icns		"$BUILD/$APP/Contents/Resources"
+cp misc/SqueakImage.icns	"$BUILD/$APP/Contents/Resources"
+cp misc/pharo.sh		"$BUILD/$APP"
+cp misc/pharo.ini		"$BUILD/$APP"
+cp misc/readme.txt		"$BUILD/$APP"
 
 echo "Zip up results"
-( rm -f $ZIP; cd $BUILD; zip -q -r ../$ZIP $APP )
+( rm -f "$ZIP"; cd "$BUILD"; zip -q -r "../$ZIP" "$APP" )
 
 echo "Clean up"
-rm -f cog-unix.zip cog-mac.zip Pharo-1.4.zip
-rm -rf $BUILD
+rm -rf "$BUILD"
 
 echo "Done"
-ls -l $ZIP
+ls -l "$ZIP"
