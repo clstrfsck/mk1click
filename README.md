@@ -16,7 +16,7 @@ Note that Windows VM is currently *not* included.  If there is an official place
 
     ./mk1click
 
-You should end up with a file `Pharo-1.4-nightly-OneClick.zip` in the current directory.
+You should end up with a file `Pharo-1.4-<image_build#>-L<linux_vm_build#>-M<macos_vm_build#>-W<win32_vm_build#>-OneClick.zip` in the current directory.
 
 ## License
 
