@@ -10,6 +10,12 @@ if [ -e $BUILD ]; then
   exit 1
 fi
 
+if [ ! -d misc ]; then
+  echo "Cant find support directory 'misc'."
+  echo "Did you run the script in the right directory?"
+  exit 1
+fi
+
 function get_buildnum {
     # First argument is job name
     curl -f "$JENKINS/$1/lastSuccessfulBuild/buildNumber"
@@ -39,6 +45,11 @@ WFILE=cog-win32-${WBLDNUM}.zip
 BASENAME=Pharo-1.4-${PBLDNUM}-L${LBLDNUM}-M${MBLDNUM}-W${WBLDNUM}-OneClick
 APP=${BASENAME}.app
 ZIP=${BASENAME}.zip
+
+if [ -f "$ZIP" ]; then
+  echo "$ZIP is already built, exiting."
+  exit 0
+fi
 
 echo "Building $ZIP using Pharo 1.4 build $PBLDNUM"
 echo "Using Linux/MacOS/Win32 Cog VM builds $LBLDNUM/$MBLDNUM/$WBLDNUM"
@@ -73,3 +84,6 @@ rm -rf "$BUILD"
 
 echo "Done"
 ls -l "$ZIP"
+if [ -x "mk1click-post.sh" ]; then
+  ./mk1click-post.sh "$ZIP"
+fi
