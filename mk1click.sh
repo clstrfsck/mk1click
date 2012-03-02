@@ -18,7 +18,8 @@ fi
 
 function get_buildnum {
     # First argument is job name
-    curl -f "$JENKINS/$1/lastSuccessfulBuild/buildNumber"
+    # Delete everything but numbers using tr to avoid malicious input
+    curl -f "$JENKINS/$1/lastSuccessfulBuild/buildNumber" | tr -dc 0123456789
 }
 
 function get_buildfile {
