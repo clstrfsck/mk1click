@@ -19,7 +19,7 @@ fi
 function get_buildnum {
     # First argument is job name
     # Delete everything but numbers using tr to avoid malicious input
-    curl -f "$JENKINS/$1/lastSuccessfulBuild/buildNumber" | tr -dc 0123456789
+    curl -fs "$JENKINS/$1/lastSuccessfulBuild/buildNumber" | tr -dc 0123456789
 }
 
 function get_buildfile {
@@ -31,12 +31,25 @@ function get_buildfile {
     fi
 }
 
-echo "Fetch Pharo and VM build numbers"
+echo -n "Fetch Pharo and VM build numbers"
 PBLDNUM=`get_buildnum "Pharo%201.4"`
+echo -n .
 LBLDNUM=`get_buildnum "Cog-Unix"`
+echo -n .
 MBLDNUM=`get_buildnum "Cog-Mac-Cocoa"`
+echo -n .
 #WBLDNUM=`get_buildnum "Cog-Win32"`
 WBLDNUM=0
+echo .
+
+if [ -z "$PBLDNUM" -o -z "$LBLDNUM" -o -z "$MBLDNUM" -o -z "$WBLDNUM" ]; then
+  echo "One of the build numbers is not available:"
+  echo " Pharo Image = $PBLDNUM"
+  echo " Linux VM    = $LBLDNUM"
+  echo " MacOS X VM  = $MBLDNUM"
+  echo " Windows VM  = $WBLDNUM"
+  exit 1
+fi
 
 PFILE=Pharo-1.4-${PBLDNUM}.zip
 LFILE=cog-linux-${LBLDNUM}.zip
