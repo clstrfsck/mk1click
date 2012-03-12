@@ -38,8 +38,7 @@ LBLDNUM=`get_buildnum "Cog-Unix"`
 echo -n .
 MBLDNUM=`get_buildnum "Cog-Mac-Cocoa"`
 echo -n .
-#WBLDNUM=`get_buildnum "Cog-Win32"`
-WBLDNUM=0
+WBLDNUM=`get_buildnum "Cog-Win32"`
 echo .
 
 if [ -z "$PBLDNUM" -o -z "$LBLDNUM" -o -z "$MBLDNUM" -o -z "$WBLDNUM" ]; then
@@ -70,7 +69,7 @@ echo "Using Linux/MacOS/Win32 Cog VM builds $LBLDNUM/$MBLDNUM/$WBLDNUM"
 
 get_buildfile "$LFILE" "Cog-Unix"	${LBLDNUM} Cog.zip
 get_buildfile "$MFILE" "Cog-Mac-Cocoa"	${MBLDNUM} CogVM.zip
-get_buildfile "$WFILE" "Cog-Win32"	${WBLDNUM} CogVM.zip
+get_buildfile "$WFILE" "Cog-Win32"	${WBLDNUM} Cog.zip
 
 get_buildfile "$PFILE" "Pharo%201.4"	${PBLDNUM} Pharo-1.4.zip
 
@@ -79,7 +78,13 @@ unzip -q -d "$BUILD"				"$MFILE"
 mv "$BUILD/CogVM.app" "$BUILD/$APP"
 unzip -q -d "$BUILD/$APP/Contents/Linux"	"$LFILE"
 unzip -q -d "$BUILD/$APP"			"$WFILE"
+mv "$BUILD/$APP/CogVM.exe" "$BUILD/$APP/pharo.exe"
 unzip -q -j -d "$BUILD/$APP/Contents/Resources"	"$PFILE"
+
+echo "Remove unwanted libs from windows build"
+rm "$BUILD/$APP/libCogVM.dll.a"
+rm "$BUILD/$APP/libFT2Plugin.dll.a"
+rm "$BUILD/$APP/libSqueakFFIPrims.dll.a"
 
 echo "Additional files"
 cp misc/Info.plist		"$BUILD/$APP/Contents"
