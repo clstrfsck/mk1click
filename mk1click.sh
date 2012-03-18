@@ -33,6 +33,8 @@ function get_buildfile {
 
 echo -n "Fetch Pharo and VM build numbers"
 PBLDNUM=`get_buildnum "Pharo%201.4"`
+PREVURL="$JENKINS/Pharo%201.4/$PBLDNUM/api/xml?xpath=/*/description"
+PREVNUM=`curl -fs "${PREVURL}" | cut -f2 -d " " | tr -dc 0123456789`
 echo -n .
 LBLDNUM=`get_buildnum "Cog-Unix"`
 echo -n .
@@ -41,21 +43,22 @@ echo -n .
 WBLDNUM=`get_buildnum "Cog-Win32"`
 echo .
 
-if [ -z "$PBLDNUM" -o -z "$LBLDNUM" -o -z "$MBLDNUM" -o -z "$WBLDNUM" ]; then
-  echo "One of the build numbers is not available:"
-  echo " Pharo Image = $PBLDNUM"
-  echo " Linux VM    = $LBLDNUM"
-  echo " MacOS X VM  = $MBLDNUM"
-  echo " Windows VM  = $WBLDNUM"
+if [ -z "$PBLDNUM" -o -z "$PREVNUM" -o -z "$LBLDNUM" -o -z "$MBLDNUM" -o -z "$WBLDNUM" ]; then
+  echo "One of the build or revision numbers is not available:"
+  echo " Pharo Image    = $PBLDNUM"
+  echo " Pharo revision = $PREVNUM"
+  echo " Linux VM       = $LBLDNUM"
+  echo " MacOS X VM     = $MBLDNUM"
+  echo " Windows VM     = $WBLDNUM"
   exit 1
 fi
 
-PFILE=Pharo-1.4-${PBLDNUM}.zip
+PFILE=Pharo-1.4-${PREVNUM}.zip
 LFILE=cog-linux-${LBLDNUM}.zip
 MFILE=cog-macos-${MBLDNUM}.zip
 WFILE=cog-win32-${WBLDNUM}.zip
 
-BASENAME=Pharo-1.4-${PBLDNUM}-L${LBLDNUM}-M${MBLDNUM}-W${WBLDNUM}-OneClick
+BASENAME=Pharo-1.4-${PREVNUM}-L${LBLDNUM}-M${MBLDNUM}-W${WBLDNUM}-OneClick
 APP=${BASENAME}.app
 ZIP=${BASENAME}.zip
 
